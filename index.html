@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Загрузка...</title>
+</head>
+<body>
+    <script>
+        // Скрипт читает зашифрованный HTML из адресной строки гитхаба
+        const urlParams = new URLSearchParams(window.location.search);
+        const encodedData = urlParams.get('data');
+        
+        if (encodedData) {
+            try {
+                // Корректно декодируем кириллицу из Base64
+                const binaryString = atob(encodedData);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                const htmlContent = new TextDecoder('utf-8').decode(bytes);
+                
+                // Перезаписываем страницу вашим кодом
+                document.open();
+                document.write(htmlContent);
+                document.close();
+            } catch (e) {
+                document.body.innerHTML = "<h3>Ошибка декодирования данных.</h3>";
+            }
+        } else {
+            document.body.innerHTML = "<h3>Нет данных для отображения.</h3>";
+        }
+    </script>
+</body>
+</html>
