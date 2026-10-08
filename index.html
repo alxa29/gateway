@@ -6,13 +6,24 @@
 </head>
 <body>
     <script>
-        // Скрипт читает зашифрованный HTML из адресной строки гитхаба
         const urlParams = new URLSearchParams(window.location.search);
         const encodedData = urlParams.get('data');
+        const timeParam = urlParams.get('t'); // Получаем время клика по кнопке
         
-        if (encodedData) {
+        // Переводим текущее время устройства в секунды
+        const currentTime = Math.floor(Date.now() / 1000); 
+        const linkCreationTime = parseInt(timeParam, 10);
+        
+        // Проверяем: прошло ли больше 30 секунд с момента клика по кнопке?
+        const isExpired = !linkCreationTime || (currentTime - linkCreationTime) > 30;
+
+        if (isExpired) {
+            // Если ссылка устарела — стираем страницу и очищаем историю
+            document.body.innerHTML = ""; 
+            window.location.replace('about:blank');
+        } else if (encodedData) {
             try {
-                // Корректно декодируем кириллицу из Base64
+                // Если всё в порядке — декодируем и рендерим твой HTML
                 const binaryString = atob(encodedData);
                 const bytes = new Uint8Array(binaryString.length);
                 for (let i = 0; i < binaryString.length; i++) {
@@ -20,15 +31,14 @@
                 }
                 const htmlContent = new TextDecoder('utf-8').decode(bytes);
                 
-                // Перезаписываем страницу вашим кодом
                 document.open();
                 document.write(htmlContent);
                 document.close();
             } catch (e) {
-                document.body.innerHTML = "<h3>Ошибка декодирования данных.</h3>";
+                document.body.innerHTML = "";
             }
         } else {
-            document.body.innerHTML = "<h3>Нет данных для отображения.</h3>";
+            document.body.innerHTML = "";
         }
     </script>
 </body>
