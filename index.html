@@ -8,22 +8,28 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const encodedData = urlParams.get('data');
-        const timeParam = urlParams.get('t'); // Получаем время клика по кнопке
+        const timeParam = urlParams.get('t'); // Время клика
+        const comebackParam = urlParams.get('comeback'); // Адрес возврата
         
-        // Переводим текущее время устройства в секунды
         const currentTime = Math.floor(Date.now() / 1000); 
         const linkCreationTime = parseInt(timeParam, 10);
         
-        // Проверяем: прошло ли больше 30 секунд с момента клика по кнопке?
+        // Проверяем 30 секунд
         const isExpired = !linkCreationTime || (currentTime - linkCreationTime) > 30;
 
         if (isExpired) {
-            // Если ссылка устарела — стираем страницу и очищаем историю
-            document.body.innerHTML = ""; 
-            window.location.replace('about:blank');
+            // Если ссылка устарела
+            if (comebackParam) {
+                // Безопасно декодируем адрес возврата и перенаправляем пользователя
+                const returnUrl = decodeURIComponent(comebackParam);
+                window.location.replace(returnUrl);
+            } else {
+                // Если адреса возврата нет — просто очищаем экран
+                document.body.innerHTML = ""; 
+                window.location.replace('about:blank');
+            }
         } else if (encodedData) {
             try {
-                // Если всё в порядке — декодируем и рендерим твой HTML
                 const binaryString = atob(encodedData);
                 const bytes = new Uint8Array(binaryString.length);
                 for (let i = 0; i < binaryString.length; i++) {
